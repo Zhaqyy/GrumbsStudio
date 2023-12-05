@@ -22,7 +22,7 @@ document.body.appendChild(stats.dom);
 // Canvas and scene
 const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
-// scene.background = new THREE.Color(0xffffff)
+scene.background = new THREE.Color(0xffffff)
 
 // Sizes
 const sizes = {
@@ -137,7 +137,7 @@ const PlaneMat = new THREE.MeshBasicMaterial({
     color: "#0f0f1f",
     // roughness: 1.0,
 })
- 
+
 const planeMesh = new THREE.Mesh(planegeo, PlaneMat)
 planeMesh.receiveShadow = true
 planeMesh.rotation.x = -Math.PI / 2;
@@ -145,17 +145,17 @@ planeMesh.position.x = 0
 planeMesh.position.y = 0
 planeMesh.position.z = 0
 
-const groundReflector = new ReflectorForSSRPass( planegeo, {
+const groundReflector = new ReflectorForSSRPass(planegeo, {
     clipBias: 0.0003,
     textureWidth: window.innerWidth,
     textureHeight: window.innerHeight,
     color: 0x888888,
     useDepthTexture: true,
-} );
+});
 groundReflector.material.depthWrite = false;
-groundReflector.rotation.x = - Math.PI / 2;
+groundReflector.rotation.x = -Math.PI / 2;
 groundReflector.visible = false;
-scene.add( groundReflector );
+scene.add(groundReflector);
 
 scene.add(planeMesh)
 
@@ -335,6 +335,7 @@ controls.enableDamping = true
 controls.enablePan = true
 controls.enableRotate = true
 controls.enableZoom = true
+controls.update();
 
 
 
@@ -343,13 +344,27 @@ controls.enableZoom = true
 const renderPass = new RenderPass(scene, camera);
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(sizes.width, sizes.height),
-    0.9,
+    0.1,
     0,
-    0.1
+    0.5
 );
 bloomPass.resolution.set(sizes.width, sizes.height);
 
 const composer = new EffectComposer(renderer);
+
+const ssrPass = new SSRPass({
+    renderer,
+    scene,
+    camera,
+    width: innerWidth,
+    height: innerHeight,
+    groundReflector: groundReflector ? groundReflector : null,
+    // selects: params.groundReflector ? selects : null
+});
+
+composer.addPass(ssrPass);
+composer.addPass(new OutputPass());
+
 composer.addPass(renderPass);
 composer.addPass(bloomPass);
 
@@ -376,6 +391,11 @@ window.addEventListener('resize', () => {
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    composer.setSize(window.innerWidth, window.innerHeight);
+
+    groundReflector.getRenderTarget().setSize(window.innerWidth, window.innerHeight);
+    groundReflector.resolution.set(window.innerWidth, window.innerHeight);
+
 
 })
 
@@ -404,10 +424,11 @@ const tick = () => {
     // grumbs.rotation.x += (parallaxX - grumbs.rotation.x) * 0.5 
     // grumbs.rotation.y += (parallaxY - grumbs.rotation.y) * 0.5 
 
+    controls.update();
 
     // Render
     stats.begin()
-    renderer.render(scene, camera)
+    // renderer.render(scene, camera)
     composer.render();
     // init()
     stats.end()
