@@ -137,7 +137,7 @@ const PlaneMat = new THREE.MeshBasicMaterial({
     color: "#0f0f1f",
     // roughness: 1.0,
 })
-
+ 
 const planeMesh = new THREE.Mesh(planegeo, PlaneMat)
 planeMesh.receiveShadow = true
 planeMesh.rotation.x = -Math.PI / 2;
