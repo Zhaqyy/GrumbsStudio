@@ -7,6 +7,9 @@ import * as Stats from 'stats.js'
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { SSRPass } from 'three/examples/jsm/postprocessing/SSRPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { ReflectorForSSRPass } from 'three/examples/jsm/objects/ReflectorForSSRPass.js';
 
 
 import nVertex from "./shaders/noise/vertex.glsl";
@@ -53,7 +56,7 @@ const gltfLoader = new GLTFLoader()
 
 //lightssss******************
 
-const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+const ambient = new THREE.AmbientLight(0xffffff, 0.5);
 
 // const point = new THREE.PointLight( 0xDC143C, 1 );
 // point.position.set(-14,0,1)
@@ -87,20 +90,14 @@ scene.add(
 
 // ****Geometry****
 
-const planegeo = new THREE.PlaneGeometry(5, 5)
-
 // *****materials**** //
 
 const TextMat = new THREE.MeshStandardMaterial({
-    color: "#f9c9f9",
+    color: "#ffffff",
     metalness: 0.5,
     roughness: 0.5,
 })
 
-const PlaneMat = new THREE.MeshStandardMaterial({
-    color: "#ffffff",
-    roughness: 1.0,
-})
 
 const noiseMat = new THREE.ShaderMaterial({
     uniforms: {
@@ -133,12 +130,32 @@ glassMat.thickness = 1.5
 // glassMat.envMapIntensity= 1.5,
 
 // *****Meshh and model****
+
+const planegeo = new THREE.PlaneGeometry(5, 5)
+
+const PlaneMat = new THREE.MeshBasicMaterial({
+    color: "#0f0f1f",
+    // roughness: 1.0,
+})
+
 const planeMesh = new THREE.Mesh(planegeo, PlaneMat)
 planeMesh.receiveShadow = true
-planeMesh.rotation.x = Math.PI / 2;
+planeMesh.rotation.x = -Math.PI / 2;
 planeMesh.position.x = 0
 planeMesh.position.y = 0
 planeMesh.position.z = 0
+
+const groundReflector = new ReflectorForSSRPass( planegeo, {
+    clipBias: 0.0003,
+    textureWidth: window.innerWidth,
+    textureHeight: window.innerHeight,
+    color: 0x888888,
+    useDepthTexture: true,
+} );
+groundReflector.material.depthWrite = false;
+groundReflector.rotation.x = - Math.PI / 2;
+groundReflector.visible = false;
+scene.add( groundReflector );
 
 scene.add(planeMesh)
 
@@ -164,13 +181,15 @@ gltfLoader.load(
         scene.add(gltf.scene);
 
 
-        // text.material = TextMat;
+        strobeLeft.material = TextMat;
+        strobeRight.material = TextMat;
+        X.material = TextMat;
         // text.scale.set(1.5, 1.5, 1.5)
         // text.position.y = 1.5
         // text.castShadow = true
 
-        // grumbs.material = noiseMat;
-        // // grumbs.castShadow = true
+        grumbs.material = noiseMat;
+        // grumbs.castShadow = true
         // grumbs.scale.set(10, 10, 10)
         // grumbs.position.x = 0
         // grumbs.position.y = -2
@@ -299,14 +318,14 @@ const cameraGroup = new THREE.Group()
 scene.add(cameraGroup)
 
 // Base camera
-let camZ = 8;
+let camZ = 3;
 camera = new THREE.PerspectiveCamera(
     45,
     sizes.width / sizes.height,
     0.1,
     100
 );
-camera.position.set(0, 0, camZ);
+camera.position.set(5, 3, camZ);
 camera.lookAt(0, 0, 0);
 cameraGroup.add(camera);
 
@@ -324,9 +343,9 @@ controls.enableZoom = true
 const renderPass = new RenderPass(scene, camera);
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(sizes.width, sizes.height),
-    0.25,
+    0.9,
     0,
-    0.15
+    0.1
 );
 bloomPass.resolution.set(sizes.width, sizes.height);
 
