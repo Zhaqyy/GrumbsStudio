@@ -101,7 +101,8 @@ scene.add(
 
 const TextMat = new THREE.MeshStandardMaterial({
     color: "#ffffff",
-  emissive: "#ffffff"
+  emissive: "#ffffff",
+//   emissiveIntensity:0.4
 })
 
 
@@ -316,7 +317,7 @@ controls.enableZoom = true
 controls.update();
 
 //Reflective Ground//////
-const planegeo = new THREE.PlaneGeometry(5, 5)
+const planegeo = new THREE.PlaneGeometry(10, 10)
 
 const PlaneMat = new THREE.MeshPhongMaterial({
     color: 0x000000,
@@ -334,7 +335,7 @@ const groundMirror = new Reflector( planegeo, {
     clipBias: 0.003,
     textureWidth: window.innerWidth * window.devicePixelRatio,
     textureHeight: window.innerHeight * window.devicePixelRatio,
-    color: 0xb5b5b5
+    color: 0xb5b5b5,
 } );
 groundMirror.position.y = 0;
 groundMirror.rotateX( - Math.PI / 2 );
@@ -378,7 +379,7 @@ scene.add( groundMirror );
 const renderPass = new RenderPass(scene, camera);
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(sizes.width, sizes.height),
-    0.5,
+    0.3,
     0,
     0.1
 );
