@@ -10,7 +10,8 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { SSRPass } from 'three/examples/jsm/postprocessing/SSRPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { ReflectorForSSRPass } from 'three/examples/jsm/objects/ReflectorForSSRPass.js';
-
+import MeshReflectorMaterial from './helper/MeshReflectorMaterial'
+import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
 
 import nVertex from "./shaders/noise/vertex.glsl";
 import nFragment from "./shaders/noise/fragment.glsl";
@@ -22,7 +23,11 @@ document.body.appendChild(stats.dom);
 // Canvas and scene
 const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
-scene.background = new THREE.Color(0xffffff)
+scene.background = new THREE.Color(
+    0x000000
+    // 0x443333
+    )
+// scene.fog = new THREE.Fog( 0x443333, 1, 4 );
 
 // Sizes
 const sizes = {
@@ -56,10 +61,10 @@ const gltfLoader = new GLTFLoader()
 
 //lightssss******************
 
-const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+const ambient = new THREE.AmbientLight(0xffffff, 1);
 
-// const point = new THREE.PointLight( 0xDC143C, 1 );
-// point.position.set(-14,0,1)
+const point = new THREE.PointLight( 0xDC143C, 1 );
+point.position.set(1,0,0)
 
 // const pointb = point.clone() 
 // point.color= new THREE.Color(0xc341ff);
@@ -85,7 +90,9 @@ const ambient = new THREE.AmbientLight(0xffffff, 0.5);
 
 scene.add(
     // cursorLight, 
-    ambient)
+    ambient
+    // ,point
+    )
 
 
 // ****Geometry****
@@ -94,8 +101,7 @@ scene.add(
 
 const TextMat = new THREE.MeshStandardMaterial({
     color: "#ffffff",
-    metalness: 0.5,
-    roughness: 0.5,
+  emissive: "#ffffff"
 })
 
 
@@ -130,34 +136,6 @@ glassMat.thickness = 1.5
 // glassMat.envMapIntensity= 1.5,
 
 // *****Meshh and model****
-
-const planegeo = new THREE.PlaneGeometry(5, 5)
-
-const PlaneMat = new THREE.MeshBasicMaterial({
-    color: "#0f0f1f",
-    // roughness: 1.0,
-})
-
-const planeMesh = new THREE.Mesh(planegeo, PlaneMat)
-planeMesh.receiveShadow = true
-planeMesh.rotation.x = -Math.PI / 2;
-planeMesh.position.x = 0
-planeMesh.position.y = 0
-planeMesh.position.z = 0
-
-const groundReflector = new ReflectorForSSRPass(planegeo, {
-    clipBias: 0.0003,
-    textureWidth: window.innerWidth,
-    textureHeight: window.innerHeight,
-    color: 0x888888,
-    useDepthTexture: true,
-});
-groundReflector.material.depthWrite = false;
-groundReflector.rotation.x = -Math.PI / 2;
-groundReflector.visible = false;
-scene.add(groundReflector);
-
-scene.add(planeMesh)
 
 
 
@@ -337,6 +315,62 @@ controls.enableRotate = true
 controls.enableZoom = true
 controls.update();
 
+//Reflective Ground//////
+const planegeo = new THREE.PlaneGeometry(5, 5)
+
+const PlaneMat = new THREE.MeshPhongMaterial({
+    color: 0x000000,
+    // roughness: 1.0,
+})
+
+const planeMesh = new THREE.Mesh(planegeo,PlaneMat)
+planeMesh.receiveShadow = true
+planeMesh.rotation.x = -Math.PI / 2;
+planeMesh.position.x = 0
+planeMesh.position.y = - 0.0001;
+planeMesh.position.z = 0
+
+const groundMirror = new Reflector( planegeo, {
+    clipBias: 0.003,
+    textureWidth: window.innerWidth * window.devicePixelRatio,
+    textureHeight: window.innerHeight * window.devicePixelRatio,
+    color: 0xb5b5b5
+} );
+groundMirror.position.y = 0;
+groundMirror.rotateX( - Math.PI / 2 );
+scene.add( groundMirror );
+
+
+// planeMesh.material = new MeshReflectorMaterial(renderer, camera, scene, planeMesh, {
+//     resolution: 1024,
+//     blur: [512, 128],
+//     mixBlur: 2.5,
+//     mixContrast: 1.5,
+//     mirror: 1
+// });
+
+// planeMesh.material.setValues({
+//     roughnessMap: new THREE.TextureLoader().load("/roughness.jpg"),
+//     normalMap: new THREE.TextureLoader().load("/normal.png"),
+//     normalScale: new THREE.Vector2(0.3, 0.3)
+// })
+// scene.add(planeMesh)
+
+
+// const groundReflector = new ReflectorForSSRPass(planegeo, {
+//     clipBias: 0.0003,
+//     textureWidth: window.innerWidth,
+//     textureHeight: window.innerHeight,
+//     color: 0xff0000,
+//     useDepthTexture: false,
+// });
+// groundReflector.material.depthWrite = false;
+// groundReflector.rotation.x = -Math.PI / 2;
+// groundReflector.position.set( 0, 0.001, 0 );
+// groundReflector.visible = false;
+// scene.add(groundReflector);
+// console.log(groundReflector);
+
 
 
 //*****post processing****
@@ -344,9 +378,9 @@ controls.update();
 const renderPass = new RenderPass(scene, camera);
 const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(sizes.width, sizes.height),
-    0.1,
+    0.5,
     0,
-    0.5
+    0.1
 );
 bloomPass.resolution.set(sizes.width, sizes.height);
 
@@ -358,12 +392,14 @@ const ssrPass = new SSRPass({
     camera,
     width: innerWidth,
     height: innerHeight,
-    groundReflector: groundReflector ? groundReflector : null,
+    // groundReflector: groundReflector,
     // selects: params.groundReflector ? selects : null
 });
+ssrPass.thickness = 0.018;
+ssrPass.infiniteThick = true
 
-composer.addPass(ssrPass);
-composer.addPass(new OutputPass());
+// composer.addPass(ssrPass);
+// composer.addPass(new OutputPass());
 
 composer.addPass(renderPass);
 composer.addPass(bloomPass);
@@ -385,6 +421,7 @@ window.addEventListener('resize', () => {
         camera.position.z = camZ;
     }
     camera.updateProjectionMatrix()
+    plane.material.update()
 
     bloomPass.resolution.set(sizes.width, sizes.height);
 
@@ -393,9 +430,13 @@ window.addEventListener('resize', () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     composer.setSize(window.innerWidth, window.innerHeight);
 
-    groundReflector.getRenderTarget().setSize(window.innerWidth, window.innerHeight);
-    groundReflector.resolution.set(window.innerWidth, window.innerHeight);
+    // groundReflector.getRenderTarget().setSize(window.innerWidth, window.innerHeight);
+    // groundReflector.resolution.set(window.innerWidth, window.innerHeight);
 
+    groundMirror.getRenderTarget().setSize(
+        window.innerWidth * window.devicePixelRatio,
+        window.innerHeight * window.devicePixelRatio
+    );
 
 })
 
@@ -406,7 +447,7 @@ if (sizes.width < sizes.height) {
     camera.position.z = camZ;
 }
 camera.updateProjectionMatrix()
-
+//  planeMesh.material.update()
 /**
  * Animate
  */
@@ -425,10 +466,12 @@ const tick = () => {
     // grumbs.rotation.y += (parallaxY - grumbs.rotation.y) * 0.5 
 
     controls.update();
+   
 
     // Render
     stats.begin()
     // renderer.render(scene, camera)
+
     composer.render();
     // init()
     stats.end()

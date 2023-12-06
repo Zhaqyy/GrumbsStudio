@@ -75,7 +75,7 @@ export default class MeshReflectorMaterial extends MeshStandardMaterial {
     const parameters = {
       minFilter: LinearFilter,
       magFilter: LinearFilter,
-      encoding: this.gl.outputEncoding,
+      colorSpace: this.gl.SRGBColorSpace,
     }
 
     const fbo1 = new WebGLRenderTarget(resolution, resolution, parameters)
