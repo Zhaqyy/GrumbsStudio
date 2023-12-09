@@ -7,15 +7,19 @@ import * as Stats from 'stats.js'
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-import { SSRPass } from 'three/examples/jsm/postprocessing/SSRPass.js';
-import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
-import { ReflectorForSSRPass } from 'three/examples/jsm/objects/ReflectorForSSRPass.js';
-import MeshReflectorMaterial from './helper/MeshReflectorMaterial'
-import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
-// import { Reflector } from './helper/reflect.js';
+// import { SSRPass } from 'three/examples/jsm/postprocessing/SSRPass.js';
+// import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+// import { ReflectorForSSRPass } from 'three/examples/jsm/objects/ReflectorForSSRPass.js';
+// import MeshReflectorMaterial from './helper/MeshReflectorMaterial'
+// import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
+import { Reflector } from './helper/reflect.js';
 
 import nVertex from "./shaders/noise/vertex.glsl";
 import nFragment from "./shaders/noise/fragment.glsl";
+import mVertex from "./shaders/mirror/vertex.glsl";
+import mFragment from "./shaders/mirror/fragment.glsl";
+
+import { Water } from 'three/examples/jsm/objects/Water.js'
 
 
 const stats = new Stats();
@@ -37,7 +41,6 @@ const sizes = {
 }
 
 
-
 /**
  * Loaders
  */
@@ -45,6 +48,22 @@ const sizes = {
 // Texture loader
 
 // const textureLoader = new THREE.TextureLoader()
+
+const dudvMap = new THREE.TextureLoader().load('/waterdudv.jpg')
+
+dudvMap.wrapS = dudvMap.wrapT = THREE.RepeatWrapping;
+// Reflector.ReflectorShader.uniforms.tDudv.value = {value: dudvMap};
+
+
+// const dudvMap = new THREE.TextureLoader().load( '/waterdudv.jpg', function () {
+
+//     animate();
+
+// } );
+
+// dudvMap.wrapS = dudvMap.wrapT = THREE.RepeatWrapping;
+// reflector.material.uniforms.tDudv.value = dudvMap;
+
 
 // Draco loader
 // const dracoLoader = new DRACOLoader()
@@ -334,53 +353,29 @@ const planeMesh = new THREE.Mesh(planegeo, PlaneMat)
 planeMesh.receiveShadow = true
 planeMesh.rotation.x = -Math.PI / 2;
 planeMesh.position.x = 0
-planeMesh.position.y =  0.0001;
+planeMesh.position.y = - 0.0001;
 planeMesh.position.z = 0
 // scene.add( planeMesh );
 
-// const groundMirror = new Reflector( planegeo, {
-//     clipBias: 0.003,
-//     textureWidth: window.innerWidth * window.devicePixelRatio,
-//     textureHeight: window.innerHeight * window.devicePixelRatio,
-//     color: 0xb5b5b5,
-//     // shader:``
-// } );
-// groundMirror.position.y = 0;
-// groundMirror.rotateX( - Math.PI / 2 );
-// // scene.add( groundMirror );
 
+const mirrorShader = Reflector.ReflectorShader
+mirrorShader.fragmentShader = mFragment
+mirrorShader.vertexShader = mVertex
 
-planeMesh.material = new MeshReflectorMaterial(renderer, camera, scene, planeMesh, {
-    resolution: 1024,
-    blur: [512, 128],
-    mixBlur: 2.5,
-    mixContrast: 1.5,
-    mirror: 1
-});
+const groundMirror = new Reflector( planegeo, {
+    clipBias: 0.003,
+    textureWidth: window.innerWidth ,
+    textureHeight: window.innerHeight ,
+    color: 0x000000,
+    shader: mirrorShader
+} );
+groundMirror.position.y = 0;
+groundMirror.rotateX( - Math.PI / 2 );
 
-// planeMesh.material.setValues({
-//     roughnessMap: new THREE.TextureLoader().load("/roughness.jpg"),
-//     normalMap: new THREE.TextureLoader().load("/normal.png"),
-//     normalScale: new THREE.Vector2(0.3, 0.3)
-// })
-// scene.add(planeMesh)
+// Reflector.ReflectorShader.uniforms.time.value = {value: 0};
+groundMirror.material.uniforms.tDudv.value = dudvMap;
 
-
-const groundReflector = new ReflectorForSSRPass(planegeo, {
-    clipBias: 0.0003,
-    textureWidth: window.innerWidth,
-    textureHeight: window.innerHeight,
-    color: 0xff0000,
-    useDepthTexture: false,
-});
-groundReflector.material.depthWrite = false;
-groundReflector.rotation.x = -Math.PI / 2;
-groundReflector.position.set( 0, 0.001, 0 );
-groundReflector.visible = true;
-scene.add(groundReflector);
-console.log(groundReflector);
-
-
+scene.add( groundMirror );
 
 //*****post processing****
 
@@ -395,20 +390,20 @@ bloomPass.resolution.set(sizes.width, sizes.height);
 
 const composer = new EffectComposer(renderer);
 
-const ssrPass = new SSRPass({
-    renderer,
-    scene,
-    camera,
-    width: innerWidth,
-    height: innerHeight,
-    groundReflector: groundReflector,
-    // selects: params.groundReflector ? selects : null
-});
-ssrPass.thickness = 0.018;
-ssrPass.infiniteThick = true
+// const ssrPass = new SSRPass({
+//     renderer,
+//     scene,
+//     camera,
+//     width: innerWidth,
+//     height: innerHeight,
+//     groundReflector: groundReflector,
+//     selects:  null
+// });
+// ssrPass.thickness = 0.018;
+// ssrPass.infiniteThick = true
 
-composer.addPass(ssrPass);
-composer.addPass(new OutputPass());
+// composer.addPass(ssrPass);
+// composer.addPass(new OutputPass());
 
 composer.addPass(renderPass);
 composer.addPass(bloomPass);
@@ -430,7 +425,6 @@ window.addEventListener('resize', () => {
         camera.position.z = camZ;
     }
     camera.updateProjectionMatrix()
-    plane.material.update()
 
     bloomPass.resolution.set(sizes.width, sizes.height);
 
@@ -443,8 +437,8 @@ window.addEventListener('resize', () => {
     // groundReflector.resolution.set(window.innerWidth, window.innerHeight);
 
     groundMirror.getRenderTarget().setSize(
-        window.innerWidth * window.devicePixelRatio,
-        window.innerHeight * window.devicePixelRatio
+        window.innerWidth,
+        window.innerHeight
     );
 
 })
@@ -466,8 +460,8 @@ const tick = () => {
     const elapsedTime = clock.getElapsedTime()
 
     //update shader
-    // noiseMat.uniforms.u_time.value = elapsedTime
-
+    groundMirror.material.uniforms.time.value = elapsedTime
+    
     // const parallaxX = pointer.x  * 0.5
     // const parallaxY = -pointer.y * 0.5
 
