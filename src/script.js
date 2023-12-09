@@ -83,7 +83,7 @@ const gltfLoader = new GLTFLoader()
 
 const ambient = new THREE.AmbientLight(0xffffff, 1);
 
-const point = new THREE.PointLight( 0xDC143C, 1 );
+const point = new THREE.PointLight( 0xff0000, 2.5 );
 point.position.set(1,0,0)
 
 // const pointb = point.clone() 
@@ -109,9 +109,9 @@ cursorLight.shadow.bias = - 0.0002;
 cursorLight.shadow.radius = 4;
 
 scene.add(
-    cursorLight, 
+    // cursorLight, 
     ambient
-    // ,point
+    ,point
     )
 
 
@@ -461,6 +461,7 @@ const tick = () => {
 
     //update shader
     groundMirror.material.uniforms.time.value = elapsedTime
+    noiseMat.uniforms.u_time.value = elapsedTime
     
     // const parallaxX = pointer.x  * 0.5
     // const parallaxY = -pointer.y * 0.5
