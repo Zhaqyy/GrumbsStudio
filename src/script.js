@@ -12,6 +12,7 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { ReflectorForSSRPass } from 'three/examples/jsm/objects/ReflectorForSSRPass.js';
 import MeshReflectorMaterial from './helper/MeshReflectorMaterial'
 import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
+// import { Reflector } from './helper/reflect.js';
 
 import nVertex from "./shaders/noise/vertex.glsl";
 import nFragment from "./shaders/noise/fragment.glsl";
@@ -70,26 +71,26 @@ point.position.set(1,0,0)
 // point.color= new THREE.Color(0xc341ff);
 // pointb.position.set(14,0,1)
 
-// const cursorLight = new THREE.SpotLight(0xffffff, 2);
+const cursorLight = new THREE.SpotLight(0xffffff, 2);
 
-// cursorLight.target.position.set(0, 2, 0)
-// cursorLight.angle = 0.7;
-// cursorLight.penumbra = 0.5;
-// cursorLight.decay = 0;
-// cursorLight.distance = 25;
-// // cursorLight.map = textures[ 'disturb.jpg' ];
+cursorLight.target.position.set(0, 2, 0)
+cursorLight.angle = 0.7;
+cursorLight.penumbra = 0.5;
+cursorLight.decay = 0;
+cursorLight.distance = 25;
+// cursorLight.map = textures[ 'disturb.jpg' ];
 
-// cursorLight.castShadow = true;
-// cursorLight.shadow.mapSize.width = 1024;
-// cursorLight.shadow.mapSize.height = 1024;
-// cursorLight.shadow.camera.near = 1;
-// cursorLight.shadow.camera.far = 20;
-// cursorLight.shadow.focus = 1;
-// cursorLight.shadow.bias = - 0.0002;
-// cursorLight.shadow.radius = 4;
+cursorLight.castShadow = true;
+cursorLight.shadow.mapSize.width = 1024;
+cursorLight.shadow.mapSize.height = 1024;
+cursorLight.shadow.camera.near = 1;
+cursorLight.shadow.camera.far = 20;
+cursorLight.shadow.focus = 1;
+cursorLight.shadow.bias = - 0.0002;
+cursorLight.shadow.radius = 4;
 
 scene.add(
-    // cursorLight, 
+    cursorLight, 
     ambient
     // ,point
     )
@@ -231,37 +232,37 @@ gltfLoader.load(
 
 let camera;
 
-// // ****mouse movement****
+// ****mouse movement****
 
-// // Create a variable to keep track of mouse position and touch position
-// const pointer = new THREE.Vector2();
+// Create a variable to keep track of mouse position and touch position
+const pointer = new THREE.Vector2();
 
-// noiseMat.uniforms.u_mouse.value = pointer;
+noiseMat.uniforms.u_mouse.value = pointer;
 
-// // A function to be called every time the pointer (mouse or touch) moves
-// function onUpdatePointer(event) {
-//     event.preventDefault();
+// A function to be called every time the pointer (mouse or touch) moves
+function onUpdatePointer(event) {
+    event.preventDefault();
 
-//     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-//     pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-//     updateCursorLight();
-// }
+    updateCursorLight();
+}
 
-// // Function to update cursor light position based on pointer (mouse or touch)
-// function updateCursorLight() {
-//     const vector = new THREE.Vector3(pointer.x, pointer.y, 1);
-//     vector.unproject(camera);
-//     const dir = vector.sub(camera.position).normalize();
-//     const distance = -camera.position.z / dir.z;
-//     const pos = camera.position.clone().add(dir.multiplyScalar(distance));
-//     cursorLight.position.x = pos.x;
-//     cursorLight.position.y = pos.y;
-//     cursorLight.position.z = 1;
-// }
+// Function to update cursor light position based on pointer (mouse or touch)
+function updateCursorLight() {
+    const vector = new THREE.Vector3(pointer.x, pointer.y, 1);
+    vector.unproject(camera);
+    const dir = vector.sub(camera.position).normalize();
+    const distance = -camera.position.z / dir.z;
+    const pos = camera.position.clone().add(dir.multiplyScalar(distance));
+    cursorLight.position.x = pos.x;
+    cursorLight.position.y = pos.y;
+    cursorLight.position.z = 1;
+}
 
-// // Add a listener for the pointermove event
-// canvas.addEventListener("pointermove", onUpdatePointer, false);
+// Add a listener for the pointermove event
+canvas.addEventListener("pointermove", onUpdatePointer, false);
 
 
 // modelG.rotation.y = THREE.MathUtils.lerp(modelG.rotation.y, (pointer.x * Math.PI) / 20, 0.05)
@@ -319,36 +320,43 @@ controls.update();
 //Reflective Ground//////
 const planegeo = new THREE.PlaneGeometry(10, 10)
 
-const PlaneMat = new THREE.MeshPhongMaterial({
+const PlaneMat = new THREE.MeshStandardMaterial({
     color: 0x000000,
-    // roughness: 1.0,
+    emissive:0x000000,
+    roughness: 0,
+    metalness:1,
+    transparent:true,
+    opacity:0.9,
+
 })
 
-const planeMesh = new THREE.Mesh(planegeo,PlaneMat)
+const planeMesh = new THREE.Mesh(planegeo, PlaneMat)
 planeMesh.receiveShadow = true
 planeMesh.rotation.x = -Math.PI / 2;
 planeMesh.position.x = 0
-planeMesh.position.y = - 0.0001;
+planeMesh.position.y =  0.0001;
 planeMesh.position.z = 0
+// scene.add( planeMesh );
 
-const groundMirror = new Reflector( planegeo, {
-    clipBias: 0.003,
-    textureWidth: window.innerWidth * window.devicePixelRatio,
-    textureHeight: window.innerHeight * window.devicePixelRatio,
-    color: 0xb5b5b5,
-} );
-groundMirror.position.y = 0;
-groundMirror.rotateX( - Math.PI / 2 );
-scene.add( groundMirror );
+// const groundMirror = new Reflector( planegeo, {
+//     clipBias: 0.003,
+//     textureWidth: window.innerWidth * window.devicePixelRatio,
+//     textureHeight: window.innerHeight * window.devicePixelRatio,
+//     color: 0xb5b5b5,
+//     // shader:``
+// } );
+// groundMirror.position.y = 0;
+// groundMirror.rotateX( - Math.PI / 2 );
+// // scene.add( groundMirror );
 
 
-// planeMesh.material = new MeshReflectorMaterial(renderer, camera, scene, planeMesh, {
-//     resolution: 1024,
-//     blur: [512, 128],
-//     mixBlur: 2.5,
-//     mixContrast: 1.5,
-//     mirror: 1
-// });
+planeMesh.material = new MeshReflectorMaterial(renderer, camera, scene, planeMesh, {
+    resolution: 1024,
+    blur: [512, 128],
+    mixBlur: 2.5,
+    mixContrast: 1.5,
+    mirror: 1
+});
 
 // planeMesh.material.setValues({
 //     roughnessMap: new THREE.TextureLoader().load("/roughness.jpg"),
@@ -358,19 +366,19 @@ scene.add( groundMirror );
 // scene.add(planeMesh)
 
 
-// const groundReflector = new ReflectorForSSRPass(planegeo, {
-//     clipBias: 0.0003,
-//     textureWidth: window.innerWidth,
-//     textureHeight: window.innerHeight,
-//     color: 0xff0000,
-//     useDepthTexture: false,
-// });
-// groundReflector.material.depthWrite = false;
-// groundReflector.rotation.x = -Math.PI / 2;
-// groundReflector.position.set( 0, 0.001, 0 );
-// groundReflector.visible = false;
-// scene.add(groundReflector);
-// console.log(groundReflector);
+const groundReflector = new ReflectorForSSRPass(planegeo, {
+    clipBias: 0.0003,
+    textureWidth: window.innerWidth,
+    textureHeight: window.innerHeight,
+    color: 0xff0000,
+    useDepthTexture: false,
+});
+groundReflector.material.depthWrite = false;
+groundReflector.rotation.x = -Math.PI / 2;
+groundReflector.position.set( 0, 0.001, 0 );
+groundReflector.visible = true;
+scene.add(groundReflector);
+console.log(groundReflector);
 
 
 
@@ -393,14 +401,14 @@ const ssrPass = new SSRPass({
     camera,
     width: innerWidth,
     height: innerHeight,
-    // groundReflector: groundReflector,
+    groundReflector: groundReflector,
     // selects: params.groundReflector ? selects : null
 });
 ssrPass.thickness = 0.018;
 ssrPass.infiniteThick = true
 
-// composer.addPass(ssrPass);
-// composer.addPass(new OutputPass());
+composer.addPass(ssrPass);
+composer.addPass(new OutputPass());
 
 composer.addPass(renderPass);
 composer.addPass(bloomPass);
@@ -458,7 +466,7 @@ const tick = () => {
     const elapsedTime = clock.getElapsedTime()
 
     //update shader
-    noiseMat.uniforms.u_time.value = elapsedTime
+    // noiseMat.uniforms.u_time.value = elapsedTime
 
     // const parallaxX = pointer.x  * 0.5
     // const parallaxY = -pointer.y * 0.5
