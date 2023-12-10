@@ -13,27 +13,31 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 // import MeshReflectorMaterial from './helper/MeshReflectorMaterial'
 // import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
 import { Reflector } from './helper/reflect.js';
+import { InstancedFlow } from 'three/examples/jsm/modifiers/CurveModifier.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 import nVertex from "./shaders/noise/vertex.glsl";
 import nFragment from "./shaders/noise/fragment.glsl";
 import mVertex from "./shaders/mirror/vertex.glsl";
 import mFragment from "./shaders/mirror/fragment.glsl";
 
-import { Water } from 'three/examples/jsm/objects/Water.js'
 
 
 const stats = new Stats();
 document.body.appendChild(stats.dom);
 
-const basecolor = 0x443333;
+const basecolor = 0x05014a;
+// var studio;
+
 // Canvas and scene
 const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 scene.background = new THREE.Color(
     basecolor
     // 0x443333
-    )
-scene.fog = new THREE.Fog( basecolor, 1, 15 );
+)
+scene.fog = new THREE.Fog(basecolor, 1, 15);
 
 // Sizes
 const sizes = {
@@ -72,8 +76,8 @@ const gltfLoader = new GLTFLoader()
 
 const ambient = new THREE.AmbientLight(0xffffff, 1);
 
-const point = new THREE.PointLight( 0xff0000, 2.5 );
-point.position.set(1,0,0)
+const point = new THREE.PointLight(0xff0000, 2.5);
+point.position.set(1, 0, 0)
 
 // const pointb = point.clone() 
 // point.color= new THREE.Color(0xc341ff);
@@ -100,8 +104,8 @@ cursorLight.shadow.radius = 4;
 scene.add(
     // cursorLight, 
     ambient
-    ,point
-    )
+    , point
+)
 
 
 // ****Geometry****
@@ -110,8 +114,8 @@ scene.add(
 
 const TextMat = new THREE.MeshStandardMaterial({
     color: "#ffffff",
-  emissive: "#ffffff",
-//   emissiveIntensity:0.4
+    emissive: "#ffffff",
+    //   emissiveIntensity:0.4
 })
 
 
@@ -134,24 +138,22 @@ const noiseMat = new THREE.ShaderMaterial({
 
 const glassMat = new THREE.MeshPhysicalMaterial({})
 glassMat.reflectivity = 0.5
-glassMat.transmission = 1.0
+// glassMat.transmission = 1.0
 glassMat.roughness = 0.2
 glassMat.metalness = 0
-glassMat.clearcoat = 1
-glassMat.clearcoatRoughness = 0.25
-glassMat.color = new THREE.Color(0xffffff)
+// glassMat.clearcoat = 1
+// glassMat.clearcoatRoughness = 0.25
+glassMat.color = new THREE.Color(0x6f2f6f)
 glassMat.ior = 2
 glassMat.thickness = 1.5
+glassMat.transparent = true
+// glassMat.alphaHash = true
+// glassMat.opacity = 0.9
+// glassMat.opacity = 0.7
 // glassMat.envMap= hdrEquirect,
 // glassMat.envMapIntensity= 1.5,
 
 // *****Meshh and model****
-
-
-
-// const bakedMaterial = new THREE.MeshnoiseMaterial({
-//     map: bakedTexture,
-// })
 
 
 //model
@@ -160,24 +162,27 @@ glassMat.thickness = 1.5
 gltfLoader.load(
     '/grumbsStudio.glb',
     (gltf) => {
-        const strobeLeft = gltf.scene.children.find(child => child.name === 'strobeLeft')
-        const strobeRight = gltf.scene.children.find(child => child.name === 'strobeRight')
+        // const strobeLeft = gltf.scene.children.find(child => child.name === 'strobeLeft')
+        // const strobeRight = gltf.scene.children.find(child => child.name === 'strobeRight')
+        const strobes = gltf.scene.children.find(child => child.name === 'strobes')
         const X = gltf.scene.children.find(child => child.name === 'X')
         const grumbs = gltf.scene.children.find(child => child.name === 'grumbs')
 
-        // grumbs = grumbs
+        // grumbs = grumbs?
         scene.add(gltf.scene);
 
 
-        strobeLeft.material = TextMat;
-        strobeRight.material = TextMat;
-        X.material = TextMat;
+        // strobeLeft.material = TextMat;
+        strobes.material = TextMat;
+        X.material = noiseMat;
         // text.scale.set(1.5, 1.5, 1.5)
         // text.position.y = 1.5
         // text.castShadow = true
 
-        grumbs.material = noiseMat;
+        grumbs.material = glassMat;
         grumbs.scale.set(1.5, 1.5, 1.5)
+        // strobeLeft.scale.set(1.5, 1.5, 1)
+        strobes.scale.set(1.5, 1.5, 1)
         gltf.scene.scale.set(2.5, 2.5, 2.5)
         gltf.scene.rotation.set(0, 0, 0)
         // grumbs.castShadow = true
@@ -307,35 +312,35 @@ const cameraGroup = new THREE.Group()
 scene.add(cameraGroup)
 
 // Base camera
-let camZ = 0;
+let camZ = 7;
 camera = new THREE.PerspectiveCamera(
     45,
     sizes.width / sizes.height,
     0.1,
     100
 );
-camera.position.set(6, 2.5, camZ);
+camera.position.set(0, 2.5, camZ);
 camera.lookAt(0, 0, 0);
 cameraGroup.add(camera);
 
 // ******Controls
-const controls = new OrbitControls(camera, canvas)
-controls.enableDamping = true
-controls.enablePan = true
-controls.enableRotate = true
-controls.enableZoom = true
-controls.update();
+// const controls = new OrbitControls(camera, canvas)
+// controls.enableDamping = true
+// controls.enablePan = false
+// controls.enableRotate = false
+// controls.enableZoom = false
+// controls.update();
 
 //Reflective Ground//////
 const planegeo = new THREE.PlaneGeometry(15, 15)
 
 const PlaneMat = new THREE.MeshStandardMaterial({
     color: 0x000000,
-    emissive:0x000000,
+    emissive: 0x000000,
     roughness: 0,
-    metalness:1,
-    transparent:true,
-    opacity:0.9,
+    metalness: 1,
+    transparent: true,
+    opacity: 0.9,
 
 })
 
@@ -352,20 +357,20 @@ const mirrorShader = Reflector.ReflectorShader
 mirrorShader.fragmentShader = mFragment
 mirrorShader.vertexShader = mVertex
 
-const groundMirror = new Reflector( planegeo, {
+const groundMirror = new Reflector(planegeo, {
     clipBias: 0.003,
-    textureWidth: window.innerWidth ,
-    textureHeight: window.innerHeight ,
+    textureWidth: window.innerWidth,
+    textureHeight: window.innerHeight,
     color: basecolor,
     shader: mirrorShader
-} );
+});
 groundMirror.position.y = 0;
-groundMirror.rotateX( - Math.PI / 2 );
+groundMirror.rotateX(- Math.PI / 2);
 
 groundMirror.material.uniforms.tDudv.value = dudvMap;
 groundMirror.material.uniforms.mouse.value = pointer;
 
-scene.add( groundMirror );
+scene.add(groundMirror);
 
 //*****post processing****
 
@@ -449,15 +454,16 @@ const tick = () => {
     //update shader
     groundMirror.material.uniforms.time.value = elapsedTime
     noiseMat.uniforms.u_time.value = elapsedTime
-    
-    // const parallaxX = pointer.x  * 0.5
-    // const parallaxY = -pointer.y * 0.5
 
-    // grumbs.rotation.x += (parallaxX - grumbs.rotation.x) * 0.5 
-    // grumbs.rotation.y += (parallaxY - grumbs.rotation.y) * 0.5 
+    if (cameraGroup) {
 
-    controls.update();
-   
+        cameraGroup.rotation.y = THREE.MathUtils.lerp(cameraGroup.rotation.y , (pointer.x * Math.PI) / 30, 0.01)
+          cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, (-pointer.y * Math.PI) / 30, 0.01)
+      
+      }
+
+    // controls.update();
+
 
     // Render
     stats.begin()
