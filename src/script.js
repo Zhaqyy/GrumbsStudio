@@ -25,14 +25,15 @@ import { Water } from 'three/examples/jsm/objects/Water.js'
 const stats = new Stats();
 document.body.appendChild(stats.dom);
 
+const basecolor = 0x443333;
 // Canvas and scene
 const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 scene.background = new THREE.Color(
-    0x000000
+    basecolor
     // 0x443333
     )
-// scene.fog = new THREE.Fog( 0x443333, 1, 4 );
+scene.fog = new THREE.Fog( basecolor, 1, 15 );
 
 // Sizes
 const sizes = {
@@ -52,18 +53,6 @@ const sizes = {
 const dudvMap = new THREE.TextureLoader().load('/waterdudv.jpg')
 
 dudvMap.wrapS = dudvMap.wrapT = THREE.RepeatWrapping;
-// Reflector.ReflectorShader.uniforms.tDudv.value = {value: dudvMap};
-
-
-// const dudvMap = new THREE.TextureLoader().load( '/waterdudv.jpg', function () {
-
-//     animate();
-
-// } );
-
-// dudvMap.wrapS = dudvMap.wrapT = THREE.RepeatWrapping;
-// reflector.material.uniforms.tDudv.value = dudvMap;
-
 
 // Draco loader
 // const dracoLoader = new DRACOLoader()
@@ -188,6 +177,9 @@ gltfLoader.load(
         // text.castShadow = true
 
         grumbs.material = noiseMat;
+        grumbs.scale.set(1.5, 1.5, 1.5)
+        gltf.scene.scale.set(2.5, 2.5, 2.5)
+        gltf.scene.rotation.set(0, 0, 0)
         // grumbs.castShadow = true
         // grumbs.scale.set(10, 10, 10)
         // grumbs.position.x = 0
@@ -315,14 +307,14 @@ const cameraGroup = new THREE.Group()
 scene.add(cameraGroup)
 
 // Base camera
-let camZ = 3;
+let camZ = 0;
 camera = new THREE.PerspectiveCamera(
     45,
     sizes.width / sizes.height,
     0.1,
     100
 );
-camera.position.set(5, 3, camZ);
+camera.position.set(6, 2.5, camZ);
 camera.lookAt(0, 0, 0);
 cameraGroup.add(camera);
 
@@ -335,7 +327,7 @@ controls.enableZoom = true
 controls.update();
 
 //Reflective Ground//////
-const planegeo = new THREE.PlaneGeometry(10, 10)
+const planegeo = new THREE.PlaneGeometry(15, 15)
 
 const PlaneMat = new THREE.MeshStandardMaterial({
     color: 0x000000,
@@ -364,7 +356,7 @@ const groundMirror = new Reflector( planegeo, {
     clipBias: 0.003,
     textureWidth: window.innerWidth ,
     textureHeight: window.innerHeight ,
-    color: 0x000000,
+    color: basecolor,
     shader: mirrorShader
 } );
 groundMirror.position.y = 0;
