@@ -219,6 +219,9 @@ Reflector.ReflectorShader = {
 		'tDudv': {
 			value: null
 		},
+		'mouse': {
+			value: null
+		},
 
 
 	},

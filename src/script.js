@@ -256,8 +256,6 @@ let camera;
 // Create a variable to keep track of mouse position and touch position
 const pointer = new THREE.Vector2();
 
-noiseMat.uniforms.u_mouse.value = pointer;
-
 // A function to be called every time the pointer (mouse or touch) moves
 function onUpdatePointer(event) {
     event.preventDefault();
@@ -372,8 +370,8 @@ const groundMirror = new Reflector( planegeo, {
 groundMirror.position.y = 0;
 groundMirror.rotateX( - Math.PI / 2 );
 
-// Reflector.ReflectorShader.uniforms.time.value = {value: 0};
 groundMirror.material.uniforms.tDudv.value = dudvMap;
+groundMirror.material.uniforms.mouse.value = pointer;
 
 scene.add( groundMirror );
 
@@ -432,9 +430,6 @@ window.addEventListener('resize', () => {
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     composer.setSize(window.innerWidth, window.innerHeight);
-
-    // groundReflector.getRenderTarget().setSize(window.innerWidth, window.innerHeight);
-    // groundReflector.resolution.set(window.innerWidth, window.innerHeight);
 
     groundMirror.getRenderTarget().setSize(
         window.innerWidth,
