@@ -27,8 +27,12 @@ import mFragment from "./shaders/mirror/fragment.glsl";
 const stats = new Stats();
 document.body.appendChild(stats.dom);
 
-const basecolor = 0x05014a;
-// var studio;
+const basecolor = 
+// 0x463d40
+// 0x352F36
+0x28282B
+// 0x454545
+;
 
 // Canvas and scene
 const canvas = document.querySelector('canvas.webgl')
@@ -462,8 +466,8 @@ const tick = () => {
 
     if (cameraGroup) {
 
-        cameraGroup.rotation.y = THREE.MathUtils.lerp(cameraGroup.rotation.y , (pointer.x * Math.PI) / 30, 0.01)
-          cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, (-pointer.y * Math.PI) / 25, 0.001)
+        cameraGroup.rotation.y = THREE.MathUtils.lerp(cameraGroup.rotation.y , (pointer.x * Math.PI) / 30, 0.008)
+          cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, (-pointer.y * Math.PI) / 25, 0.004)
       
       }
 
