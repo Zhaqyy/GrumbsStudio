@@ -117,6 +117,11 @@ const TextMat = new THREE.MeshStandardMaterial({
     emissive: "#ffffff",
     //   emissiveIntensity:0.4
 })
+const GMat = new THREE.MeshBasicMaterial({
+    color: "#4433ff",
+    // emissive: "#f0f0f0",
+    //   emissiveIntensity:0.4
+})
 
 
 const noiseMat = new THREE.ShaderMaterial({
@@ -179,7 +184,7 @@ gltfLoader.load(
         // text.position.y = 1.5
         // text.castShadow = true
 
-        grumbs.material = glassMat;
+        grumbs.material = noiseMat;
         grumbs.scale.set(1.5, 1.5, 1.5)
         // strobeLeft.scale.set(1.5, 1.5, 1)
         strobes.scale.set(1.5, 1.5, 1)
@@ -312,14 +317,14 @@ const cameraGroup = new THREE.Group()
 scene.add(cameraGroup)
 
 // Base camera
-let camZ = 7;
+let camZ = 8;
 camera = new THREE.PerspectiveCamera(
     45,
     sizes.width / sizes.height,
     0.1,
     100
 );
-camera.position.set(0, 2.5, camZ);
+camera.position.set(0, 1, camZ);
 camera.lookAt(0, 0, 0);
 cameraGroup.add(camera);
 
@@ -458,7 +463,7 @@ const tick = () => {
     if (cameraGroup) {
 
         cameraGroup.rotation.y = THREE.MathUtils.lerp(cameraGroup.rotation.y , (pointer.x * Math.PI) / 30, 0.01)
-          cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, (-pointer.y * Math.PI) / 30, 0.01)
+          cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, (-pointer.y * Math.PI) / 25, 0.001)
       
       }
 
