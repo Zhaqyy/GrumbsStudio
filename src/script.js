@@ -1,21 +1,14 @@
 import * as dat from 'lil-gui'
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+// import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import * as Stats from 'stats.js'
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-// import { SSRPass } from 'three/examples/jsm/postprocessing/SSRPass.js';
-// import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
-// import { ReflectorForSSRPass } from 'three/examples/jsm/objects/ReflectorForSSRPass.js';
-// import MeshReflectorMaterial from './helper/MeshReflectorMaterial'
-// import { Reflector } from 'three/examples/jsm/objects/Reflector.js';
+
 import { Reflector } from './helper/reflect.js';
-import { InstancedFlow } from 'three/examples/jsm/modifiers/CurveModifier.js';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 
 import nVertex from "./shaders/noise/vertex.glsl";
 import nFragment from "./shaders/noise/fragment.glsl";
@@ -393,21 +386,6 @@ const bloomPass = new UnrealBloomPass(
 bloomPass.resolution.set(sizes.width, sizes.height);
 
 const composer = new EffectComposer(renderer);
-
-// const ssrPass = new SSRPass({
-//     renderer,
-//     scene,
-//     camera,
-//     width: innerWidth,
-//     height: innerHeight,
-//     groundReflector: groundReflector,
-//     selects:  null
-// });
-// ssrPass.thickness = 0.018;
-// ssrPass.infiniteThick = true
-
-// composer.addPass(ssrPass);
-// composer.addPass(new OutputPass());
 
 composer.addPass(renderPass);
 composer.addPass(bloomPass);
