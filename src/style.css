@@ -9,7 +9,10 @@ body
 {
     overflow: hidden;
 }
-
+.exp{
+    width: 100vw;
+    height: 100vh;
+}
 .webgl
 {
     position: fixed;

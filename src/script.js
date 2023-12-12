@@ -162,16 +162,18 @@ scene.add(point);
 
 
 //model
-
+var strobes
+var X
+var grumbs
+var gltf
 
 gltfLoader.load(
     '/grumbsStudio.glb',
     (gltf) => {
-        // const strobeLeft = gltf.scene.children.find(child => child.name === 'strobeLeft')
-        // const strobeRight = gltf.scene.children.find(child => child.name === 'strobeRight')
-        const strobes = gltf.scene.children.find(child => child.name === 'strobes')
-        const X = gltf.scene.children.find(child => child.name === 'X')
-        const grumbs = gltf.scene.children.find(child => child.name === 'grumbs')
+      
+        strobes = gltf.scene.children.find(child => child.name === 'strobes')
+         X = gltf.scene.children.find(child => child.name === 'X')
+         grumbs = gltf.scene.children.find(child => child.name === 'grumbs')
 
         // grumbs = grumbs?
         scene.add(gltf.scene);
@@ -190,6 +192,9 @@ gltfLoader.load(
         strobes.scale.set(1.5, 1.5, 1)
         gltf.scene.scale.set(2.5, 2.5, 2.5)
         gltf.scene.rotation.set(0, 0, 0)
+
+
+
         // grumbs.castShadow = true
         // grumbs.scale.set(10, 10, 10)
         // grumbs.position.x = 0
@@ -379,7 +384,7 @@ cameraGroup.add(camera);
 // controls.update();
 
 //Reflective Ground//////
-const planegeo = new THREE.PlaneGeometry(15, 15)
+const planegeo = new THREE.PlaneGeometry(15, 20)
 
 const PlaneMat = new THREE.MeshStandardMaterial({
     color: 0x000000,
@@ -445,12 +450,19 @@ window.addEventListener('resize', () => {
     // Update camera
     camera.aspect = sizes.width / sizes.height
 
-    //mobile responsiveness
-    if (sizes.width < sizes.height) {
-        camera.position.z = camZ + 5;
-    } else {
-        camera.position.z = camZ;
-    }
+  //mobile responsiveness
+  if (sizes.width < sizes.height) {
+    camera.position.z = camZ + 5;
+    scene.fog = new THREE.Fog(basecolor, 1, 30);
+    planegeo.scale.z = 1.5
+    // grumbs.scale.set(1, 1, 1)
+    // // strobeLeft.scale.set(1, 1, 1)
+    // strobes.scale.set(1, 1, 1)
+    // gltf.scene.scale.set(1, 1, 1)
+} else {
+    camera.position.z = camZ;
+}
+
     camera.updateProjectionMatrix()
 
     bloomPass.resolution.set(sizes.width, sizes.height);
@@ -467,14 +479,37 @@ window.addEventListener('resize', () => {
 
 })
 
-//***** */mobile responsiveness******
-if (sizes.width < sizes.height) {
+  //mobile responsiveness
+  if (sizes.width < sizes.height) {
     camera.position.z = camZ + 5;
+    scene.fog = new THREE.Fog(basecolor, 1, 30);
+    planegeo.scale.z = 1.5
+    // grumbs.scale.set(1, 1, 1)
+    // // strobeLeft.scale.set(1, 1, 1)
+    // strobes.scale.set(1, 1, 1)
+    // gltf.scene.scale.set(1, 1, 1)
 } else {
     camera.position.z = camZ;
 }
+
+//   //mobile responsiveness
+//   if (sizes.width < sizes.height) {
+//     camera.position.z = camZ + 5;
+//     planeMesh.scale.z = 2
+//     scene.fog = new THREE.Fog(basecolor, 1, 100);
+//     scene.children.Scene.mesh.position.y = -4
+//     // grumbs.scale.set(1, 1, 1)
+//     // strobeLeft.scale.set(1, 1, 1)
+//     strobes.scale.set(1, 1, 1)
+//     // gltf.scene.scale.set(1, 1, 1)
+// } else {
+//     camera.position.z = camZ;
+// }
+// console.log(scene);
+
+
 camera.updateProjectionMatrix()
-//  planeMesh.material.update()
+
 /**
  * Animate
  */
@@ -490,7 +525,7 @@ const tick = () => {
     if (cameraGroup) {
 
         cameraGroup.rotation.y = THREE.MathUtils.lerp(cameraGroup.rotation.y, (pointer.x * Math.PI) / 30, 0.008)
-        cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, (-pointer.y * Math.PI) / 25, 0.004)
+        cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, ((-pointer.y - 0.5) * Math.PI) / 25, 0.004)
 
     }
     updateCursorLight();
