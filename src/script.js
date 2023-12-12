@@ -20,12 +20,12 @@ import mFragment from "./shaders/mirror/fragment.glsl";
 const stats = new Stats();
 document.body.appendChild(stats.dom);
 
-const basecolor = 
-// 0x463d40
-// 0x352F36
-0x28282B
-// 0x454545
-;
+const basecolor =
+    // 0x463d40
+    // 0x352F36
+    0x28282B
+    // 0x454545
+    ;
 
 // Canvas and scene
 const canvas = document.querySelector('canvas.webgl')
@@ -73,12 +73,8 @@ const gltfLoader = new GLTFLoader()
 
 const ambient = new THREE.AmbientLight(0xffffff, 1);
 
-const point = new THREE.PointLight(0xff0000, 2.5);
-point.position.set(1, 0, 0)
-
-// const pointb = point.clone() 
-// point.color= new THREE.Color(0xc341ff);
-// pointb.position.set(14,0,1)
+// const point = new THREE.PointLight(0xff0000, 2.5);
+// point.position.set(1, 0, 0)
 
 const cursorLight = new THREE.SpotLight(0xffffff, 2);
 
@@ -98,10 +94,10 @@ cursorLight.shadow.focus = 1;
 cursorLight.shadow.bias = - 0.0002;
 cursorLight.shadow.radius = 4;
 
+
 scene.add(
     // cursorLight, 
     ambient
-    , point
 )
 
 
@@ -114,10 +110,10 @@ const TextMat = new THREE.MeshStandardMaterial({
     emissive: "#ffffff",
     //   emissiveIntensity:0.4
 })
-const GMat = new THREE.MeshBasicMaterial({
-    color: "#4433ff",
-    // emissive: "#f0f0f0",
-    //   emissiveIntensity:0.4
+const GMat = new THREE.MeshPhongMaterial({
+    color: "#ff0000",
+    emissive: "#ff0000",
+    emissiveIntensity: 2
 })
 
 
@@ -156,6 +152,13 @@ glassMat.transparent = true
 // glassMat.envMapIntensity= 1.5,
 
 // *****Meshh and model****
+
+//sphere light
+const lSphere = new THREE.SphereGeometry(0.1, 16, 8);
+
+let point = new THREE.PointLight(0x4169e1, 0.5);
+point.add(new THREE.Mesh(lSphere, GMat));
+scene.add(point);
 
 
 //model
@@ -255,35 +258,77 @@ let camera;
 // Create a variable to keep track of mouse position and touch position
 const pointer = new THREE.Vector2();
 
-// A function to be called every time the pointer (mouse or touch) moves
+let chaseDelay = 0; // Delay time in milliseconds (adjust as needed)
+let isChasing = false;
+
+// Store the target position for lerping
+const targetPosition = new THREE.Vector3();
+
 function onUpdatePointer(event) {
     event.preventDefault();
 
     pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
     pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    updateCursorLight();
+    if (!isChasing) {
+        isChasing = true;
+        setTimeout(() => {
+            setTargetPosition();
+            isChasing = false;
+        }, chaseDelay);
+    }
 }
 
-// Function to update cursor light position based on pointer (mouse or touch)
-function updateCursorLight() {
+// Function to set the target position for lerping
+function setTargetPosition() {
     const vector = new THREE.Vector3(pointer.x, pointer.y, 1);
     vector.unproject(camera);
     const dir = vector.sub(camera.position).normalize();
     const distance = -camera.position.z / dir.z;
     const pos = camera.position.clone().add(dir.multiplyScalar(distance));
-    cursorLight.position.x = pos.x;
-    cursorLight.position.y = pos.y;
-    cursorLight.position.z = 1;
+    targetPosition.copy(pos);
+}
+
+const REVOLVE_DISTANCE = 0.25; // Adjust this distance as needed
+const SMOOTHNESS = 0.01; // Adjust the smoothness of the transition
+const MAX_OFFSET = -0.1; // Maximum allowed offset
+
+function updateCursorLight() {
+    const distanceToCursor = point.position.distanceTo(targetPosition);
+
+    if (distanceToCursor < REVOLVE_DISTANCE) {
+        const angle = Date.now() * 0.001; // Adjust the speed of revolution
+
+        let offsetX = Math.cos(angle) * REVOLVE_DISTANCE;
+        let offsetY = Math.sin(angle) * REVOLVE_DISTANCE;
+
+        // Limit the maximum offset
+        const offsetMagnitude = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+        if (offsetMagnitude > MAX_OFFSET) {
+            const scale = MAX_OFFSET / offsetMagnitude;
+            offsetX *= scale;
+            offsetY *= scale;
+        }
+        // Calculate the target position for the sphere within the revolution range
+        const targetX = targetPosition.x + offsetX;
+        const targetY = targetPosition.y + offsetY;
+
+        // Smoothly transition the sphere towards the target position
+        point.position.x += (targetX - point.position.x) * SMOOTHNESS;
+        point.position.y += (targetY - point.position.y) * SMOOTHNESS;
+
+    } else {
+        point.position.lerp(targetPosition, 0.005); // Smoothly move towards the cursor
+    }
+
+    // Prevent the sphere from going below 0 on the y-axis
+    if (point.position.y < 0) {
+        point.position.y = 0;
+    }
 }
 
 // Add a listener for the pointermove event
 canvas.addEventListener("pointermove", onUpdatePointer, false);
-
-
-// modelG.rotation.y = THREE.MathUtils.lerp(modelG.rotation.y, (pointer.x * Math.PI) / 20, 0.05)
-//     modelG.rotation.x = THREE.MathUtils.lerp(modelG.rotation.x, (pointer.y * Math.PI) / 20, 0.05)
-
 
 
 
@@ -444,10 +489,11 @@ const tick = () => {
 
     if (cameraGroup) {
 
-        cameraGroup.rotation.y = THREE.MathUtils.lerp(cameraGroup.rotation.y , (pointer.x * Math.PI) / 30, 0.008)
-          cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, (-pointer.y * Math.PI) / 25, 0.004)
-      
-      }
+        cameraGroup.rotation.y = THREE.MathUtils.lerp(cameraGroup.rotation.y, (pointer.x * Math.PI) / 30, 0.008)
+        cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, (-pointer.y * Math.PI) / 25, 0.004)
+
+    }
+    updateCursorLight();
 
     // controls.update();
 
