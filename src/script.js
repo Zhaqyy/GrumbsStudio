@@ -7,7 +7,7 @@ import * as Stats from 'stats.js'
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
-
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { Reflector } from './helper/reflect.js';
 
 import nVertex from "./shaders/noise/vertex.glsl";
@@ -172,7 +172,7 @@ gltfLoader.load(
     (gltf) => {
       
         strobes = gltf.scene.children.find(child => child.name === 'strobes')
-         X = gltf.scene.children.find(child => child.name === 'X')
+        //  X = gltf.scene.children.find(child => child.name === 'X')
          grumbs = gltf.scene.children.find(child => child.name === 'grumbs')
 
         // grumbs = grumbs?
@@ -181,7 +181,7 @@ gltfLoader.load(
 
         // strobeLeft.material = TextMat;
         strobes.material = TextMat;
-        X.material = noiseMat;
+        // X.material = noiseMat;
         // text.scale.set(1.5, 1.5, 1.5)
         // text.position.y = 1.5
         // text.castShadow = true
@@ -254,6 +254,44 @@ gltfLoader.load(
         // });
     }
 )
+
+//text loader
+
+const loader = new FontLoader();
+loader.load( '/helvetiker_regular.typeface.json', function ( font ) {
+
+    const color = 0xB2BEB5;
+
+    const matLite = new THREE.MeshBasicMaterial( {
+        color: color,
+        // transparent: true,
+        // opacity: 0.4,
+        // side: THREE.DoubleSide
+    } );
+
+    const message = 'GRUMBS';
+
+    const shapes = font.generateShapes( message, 1 );
+
+    const geometry = new THREE.ShapeGeometry( shapes );
+
+    geometry.computeBoundingBox();
+
+    const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+
+    geometry.translate( xMid, 0, 0 );
+
+    // make shape ( N.B. edge view not visible )
+
+    const text = new THREE.Mesh( geometry, matLite );
+    text.position.set(0,1,0);
+    scene.add( text );
+
+  
+
+    // renderer();
+
+} ); //end load function
 
 
 let camera;
@@ -350,8 +388,8 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 renderer.outputColorSpace = THREE.SRGBColorSpace
 
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.VSMShadowMap;
+// renderer.shadowMap.enabled = true;
+// renderer.shadowMap.type = THREE.VSMShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1;
 
