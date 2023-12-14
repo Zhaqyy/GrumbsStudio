@@ -308,16 +308,17 @@ function setTargetPosition() {
     targetPosition.copy(pos);
 }
 
-const REVOLVE_DISTANCE = 0.25; // Adjust this distance as needed
-const SMOOTHNESS = 0.01; // Adjust the smoothness of the transition
-const MAX_OFFSET = -0.1; // Maximum allowed offset
+let REVOLVE_DISTANCE = 0.25; // Adjust this distance as needed
+let SMOOTHNESS = 0.01; // Adjust the smoothness of the transition
+let MAX_OFFSET = -0.1; // Maximum allowed offset
 let chaseSpeed = 0.005; // point chase Speed
+let angle = 0.001; // Adjust the speed of revolution
 
 function updateCursor() {
     const distanceToCursor = point.position.distanceTo(targetPosition);
 
     if (distanceToCursor < REVOLVE_DISTANCE) {
-        const angle = Date.now() * 0.001; // Adjust the speed of revolution
+       
 
         let offsetX = Math.cos(angle) * REVOLVE_DISTANCE;
         let offsetY = Math.sin(angle) * REVOLVE_DISTANCE;
@@ -519,17 +520,7 @@ if (sizes.width < sizes.height) {
     scene.fog = new THREE.Fog(basecolor, 1, 30);
     planeMesh.scale.z = 1.5
     chaseSpeed = 0.05
-    // if (text) {
-    //     text.scale.set(0.7,0.7,0.7);
-    //     console.log("uyayyy");   
-    // }
-    // if (gltf) {
-    //     grumbs.scale.set(1, 1, 1)
-    //     strobeLeft.scale.set(1, 1, 1)
-    //     strobeLeft.scale.set(1, 1, 1)
-    // }
-    //
-    // gltf.scene.scale.set(1, 1, 1)
+    // REVOLVE_DISTANCE = 6
 } else {
     camera.position.z = camZ;
 }
@@ -543,17 +534,29 @@ const clock = new THREE.Clock()
 
 const tick = () => {
     const elapsedTime = clock.getElapsedTime()
-
+angle = elapsedTime
     //update shader
     groundMirror.material.uniforms.time.value = elapsedTime
     noiseMat.uniforms.u_time.value = elapsedTime
 
-    if (cameraGroup) {
+    if (sizes.width < sizes.height && cameraGroup) {
+    
+        if (text) {
+            text.scale.set(0.7,0.7,0.7);
+        }
+        angle = elapsedTime * 5
+        
+        // gltf.scene.scale.set(1, 1, 1)
+        cameraGroup.rotation.y = THREE.MathUtils.lerp(cameraGroup.rotation.y, (pointer.x * Math.PI) / 30, 0.015)
+        cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, ((-pointer.y - 0.5) * Math.PI) / 100, 0.009)
+    } else {
+        camera.position.z = camZ;
 
         cameraGroup.rotation.y = THREE.MathUtils.lerp(cameraGroup.rotation.y, (pointer.x * Math.PI) / 30, 0.008)
         cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, ((-pointer.y - 0.5) * Math.PI) / 25, 0.004)
-
     }
+
+
     updateCursor();
 
     // controls.update();
