@@ -162,8 +162,8 @@ scene.add(point);
 
 
 //model
-var strobes
-var X
+var strobeLeft
+var strobeRight
 var grumbs
 var gltf
 
@@ -171,16 +171,16 @@ gltfLoader.load(
     '/grumbsStudio.glb',
     (gltf) => {
       
-        strobes = gltf.scene.children.find(child => child.name === 'strobes')
-        //  X = gltf.scene.children.find(child => child.name === 'X')
+        strobeLeft = gltf.scene.children.find(child => child.name === 'strobeLeft')
+        strobeRight = gltf.scene.children.find(child => child.name === 'strobeRight')
          grumbs = gltf.scene.children.find(child => child.name === 'grumbs')
 
         // grumbs = grumbs?
         scene.add(gltf.scene);
 
 
-        // strobeLeft.material = TextMat;
-        strobes.material = TextMat;
+        strobeLeft.material = TextMat;
+        strobeRight.material = TextMat;
         // X.material = noiseMat;
         // text.scale.set(1.5, 1.5, 1.5)
         // text.position.y = 1.5
@@ -188,8 +188,9 @@ gltfLoader.load(
 
         grumbs.material = noiseMat;
         grumbs.scale.set(1.5, 1.5, 1.5)
-        // strobeLeft.scale.set(1.5, 1.5, 1)
-        strobes.scale.set(1.5, 1.5, 1)
+        grumbs.position.set(0, -0.5, 0)
+        strobeLeft.scale.set(1.5, 1.5, 1)
+        strobeRight.scale.set(1.5, 1.5, 1)
         gltf.scene.scale.set(2.5, 2.5, 2.5)
         gltf.scene.rotation.set(0, 0, 0)
 
@@ -258,15 +259,12 @@ gltfLoader.load(
 //text loader
 
 const loader = new FontLoader();
-loader.load( '/helvetiker_regular.typeface.json', function ( font ) {
+loader.load( '/fluid.json', function ( font ) {
 
-    const color = 0xB2BEB5;
+    const color = 0x6350af;
 
     const matLite = new THREE.MeshBasicMaterial( {
         color: color,
-        // transparent: true,
-        // opacity: 0.4,
-        // side: THREE.DoubleSide
     } );
 
     const message = 'GRUMBS';
@@ -284,7 +282,7 @@ loader.load( '/helvetiker_regular.typeface.json', function ( font ) {
     // make shape ( N.B. edge view not visible )
 
     const text = new THREE.Mesh( geometry, matLite );
-    text.position.set(0,1,0);
+    text.position.set(0,1.4,0);
     scene.add( text );
 
   
