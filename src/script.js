@@ -312,7 +312,7 @@ let REVOLVE_DISTANCE = 0.25; // Adjust this distance as needed
 let SMOOTHNESS = 0.01; // Adjust the smoothness of the transition
 let MAX_OFFSET = -0.1; // Maximum allowed offset
 let chaseSpeed = 0.005; // point chase Speed
-let angle = 0.001; // Adjust the speed of revolution
+let angle; // Adjust the speed of revolution
 
 function updateCursor() {
     const distanceToCursor = point.position.distanceTo(targetPosition);
