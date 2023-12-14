@@ -73,30 +73,7 @@ const gltfLoader = new GLTFLoader()
 
 const ambient = new THREE.AmbientLight(0xffffff, 1);
 
-// const point = new THREE.PointLight(0xff0000, 2.5);
-// point.position.set(1, 0, 0)
-
-const cursorLight = new THREE.SpotLight(0xffffff, 2);
-
-cursorLight.target.position.set(0, 2, 0)
-cursorLight.angle = 0.7;
-cursorLight.penumbra = 0.5;
-cursorLight.decay = 0;
-cursorLight.distance = 25;
-// cursorLight.map = textures[ 'disturb.jpg' ];
-
-cursorLight.castShadow = true;
-cursorLight.shadow.mapSize.width = 1024;
-cursorLight.shadow.mapSize.height = 1024;
-cursorLight.shadow.camera.near = 1;
-cursorLight.shadow.camera.far = 20;
-cursorLight.shadow.focus = 1;
-cursorLight.shadow.bias = - 0.0002;
-cursorLight.shadow.radius = 4;
-
-
 scene.add(
-    // cursorLight, 
     ambient
 )
 
@@ -170,10 +147,10 @@ var gltf
 gltfLoader.load(
     '/grumbsStudio.glb',
     (gltf) => {
-      
+
         strobeLeft = gltf.scene.children.find(child => child.name === 'strobeLeft')
         strobeRight = gltf.scene.children.find(child => child.name === 'strobeRight')
-         grumbs = gltf.scene.children.find(child => child.name === 'grumbs')
+        grumbs = gltf.scene.children.find(child => child.name === 'grumbs')
 
         // grumbs = grumbs?
         scene.add(gltf.scene);
@@ -260,37 +237,37 @@ gltfLoader.load(
 var text;
 
 const loader = new FontLoader();
-loader.load( '/fluid.json', function ( font ) {
+loader.load('/fluid.json', function (font) {
 
     const color = 0x6350af;
 
-    const matLite = new THREE.MeshBasicMaterial( {
+    const matLite = new THREE.MeshBasicMaterial({
         color: color,
-    } );
+    });
 
     const message = 'GRUMBS';
 
-    const shapes = font.generateShapes( message, 1 );
+    const shapes = font.generateShapes(message, 1);
 
-    const geometry = new THREE.ShapeGeometry( shapes );
+    const geometry = new THREE.ShapeGeometry(shapes);
 
     geometry.computeBoundingBox();
 
-    const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+    const xMid = - 0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
 
-    geometry.translate( xMid, 0, 0 );
+    geometry.translate(xMid, 0, 0);
 
     // make shape ( N.B. edge view not visible )
 
-    text = new THREE.Mesh( geometry, matLite );
-    text.position.set(0,1.4,0);
-    scene.add( text );
+    text = new THREE.Mesh(geometry, matLite);
+    text.position.set(0, 1.4, 0);
+    scene.add(text);
 
-  
+
 
     // renderer();
 
-} ); //end load function
+}); //end load function
 
 
 let camera;
@@ -507,18 +484,18 @@ window.addEventListener('resize', () => {
     // Update camera
     camera.aspect = sizes.width / sizes.height
 
-  //mobile responsiveness
-  if (sizes.width < sizes.height) {
-    camera.position.z = camZ + 5;
-    scene.fog = new THREE.Fog(basecolor, 1, 30);
-    // planeMesh.scale.set(5,5,5)
-    // grumbs.scale.set(1, 1, 1)
-    // // strobeLeft.scale.set(1, 1, 1)
-    // strobes.scale.set(1, 1, 1)
-    // gltf.scene.scale.set(1, 1, 1)
-} else {
-    camera.position.z = camZ;
-}
+    //mobile responsiveness
+    if (sizes.width < sizes.height) {
+        camera.position.z = camZ + 5;
+        scene.fog = new THREE.Fog(basecolor, 1, 30);
+        // planeMesh.scale.set(5,5,5)
+        // grumbs.scale.set(1, 1, 1)
+        // // strobeLeft.scale.set(1, 1, 1)
+        // strobes.scale.set(1, 1, 1)
+        // gltf.scene.scale.set(1, 1, 1)
+    } else {
+        camera.position.z = camZ;
+    }
 
     camera.updateProjectionMatrix()
 
@@ -536,8 +513,8 @@ window.addEventListener('resize', () => {
 
 })
 
-  //mobile responsiveness
-  if (sizes.width < sizes.height) {
+//mobile responsiveness
+if (sizes.width < sizes.height) {
     camera.position.z = camZ + 5;
     scene.fog = new THREE.Fog(basecolor, 1, 30);
     planeMesh.scale.z = 1.5
