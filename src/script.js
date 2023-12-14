@@ -192,7 +192,7 @@ gltfLoader.load(
         strobeLeft.scale.set(1.5, 1.5, 1)
         strobeRight.scale.set(1.5, 1.5, 1)
         gltf.scene.scale.set(2.5, 2.5, 2.5)
-        gltf.scene.rotation.set(0, 0, 0)
+        // gltf.scene.rotation.set(0, 0, 0)
 
 
 
@@ -257,6 +257,7 @@ gltfLoader.load(
 )
 
 //text loader
+var text;
 
 const loader = new FontLoader();
 loader.load( '/fluid.json', function ( font ) {
@@ -281,7 +282,7 @@ loader.load( '/fluid.json', function ( font ) {
 
     // make shape ( N.B. edge view not visible )
 
-    const text = new THREE.Mesh( geometry, matLite );
+    text = new THREE.Mesh( geometry, matLite );
     text.position.set(0,1.4,0);
     scene.add( text );
 
@@ -333,8 +334,9 @@ function setTargetPosition() {
 const REVOLVE_DISTANCE = 0.25; // Adjust this distance as needed
 const SMOOTHNESS = 0.01; // Adjust the smoothness of the transition
 const MAX_OFFSET = -0.1; // Maximum allowed offset
+let chaseSpeed = 0.005; // point chase Speed
 
-function updateCursorLight() {
+function updateCursor() {
     const distanceToCursor = point.position.distanceTo(targetPosition);
 
     if (distanceToCursor < REVOLVE_DISTANCE) {
@@ -359,7 +361,7 @@ function updateCursorLight() {
         point.position.y += (targetY - point.position.y) * SMOOTHNESS;
 
     } else {
-        point.position.lerp(targetPosition, 0.005); // Smoothly move towards the cursor
+        point.position.lerp(targetPosition, chaseSpeed); // Smoothly move towards the cursor
     }
 
     // Prevent the sphere from going below 0 on the y-axis
@@ -368,8 +370,27 @@ function updateCursorLight() {
     }
 }
 
-// Add a listener for the pointermove event
+// Function to handle touch events
+function onTouchUpdate(event) {
+    event.preventDefault();
+
+    const touch = event.touches[0];
+
+    pointer.x = (touch.clientX / window.innerWidth) * 2 - 1;
+    pointer.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+    if (!isChasing) {
+        isChasing = true;
+        setTimeout(() => {
+            setTargetPosition();
+            isChasing = false;
+        }, chaseDelay);
+    }
+}
+
+// Add listeners for both pointermove and touchmove events
 canvas.addEventListener("pointermove", onUpdatePointer, false);
+canvas.addEventListener("touchmove", onTouchUpdate, false);
 
 
 
@@ -490,7 +511,7 @@ window.addEventListener('resize', () => {
   if (sizes.width < sizes.height) {
     camera.position.z = camZ + 5;
     scene.fog = new THREE.Fog(basecolor, 1, 30);
-    planegeo.scale.z = 1.5
+    // planeMesh.scale.set(5,5,5)
     // grumbs.scale.set(1, 1, 1)
     // // strobeLeft.scale.set(1, 1, 1)
     // strobes.scale.set(1, 1, 1)
@@ -519,30 +540,22 @@ window.addEventListener('resize', () => {
   if (sizes.width < sizes.height) {
     camera.position.z = camZ + 5;
     scene.fog = new THREE.Fog(basecolor, 1, 30);
-    planegeo.scale.z = 1.5
-    // grumbs.scale.set(1, 1, 1)
-    // // strobeLeft.scale.set(1, 1, 1)
-    // strobes.scale.set(1, 1, 1)
+    planeMesh.scale.z = 1.5
+    chaseSpeed = 0.05
+    // if (text) {
+    //     text.scale.set(0.7,0.7,0.7);
+    //     console.log("uyayyy");   
+    // }
+    // if (gltf) {
+    //     grumbs.scale.set(1, 1, 1)
+    //     strobeLeft.scale.set(1, 1, 1)
+    //     strobeLeft.scale.set(1, 1, 1)
+    // }
+    //
     // gltf.scene.scale.set(1, 1, 1)
 } else {
     camera.position.z = camZ;
 }
-
-//   //mobile responsiveness
-//   if (sizes.width < sizes.height) {
-//     camera.position.z = camZ + 5;
-//     planeMesh.scale.z = 2
-//     scene.fog = new THREE.Fog(basecolor, 1, 100);
-//     scene.children.Scene.mesh.position.y = -4
-//     // grumbs.scale.set(1, 1, 1)
-//     // strobeLeft.scale.set(1, 1, 1)
-//     strobes.scale.set(1, 1, 1)
-//     // gltf.scene.scale.set(1, 1, 1)
-// } else {
-//     camera.position.z = camZ;
-// }
-// console.log(scene);
-
 
 camera.updateProjectionMatrix()
 
@@ -564,7 +577,7 @@ const tick = () => {
         cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, ((-pointer.y - 0.5) * Math.PI) / 25, 0.004)
 
     }
-    updateCursorLight();
+    updateCursor();
 
     // controls.update();
 
