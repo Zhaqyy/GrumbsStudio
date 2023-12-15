@@ -263,10 +263,6 @@ loader.load('/fluid.json', function (font) {
     text.position.set(0, 1.4, 0);
     scene.add(text);
 
-
-
-    // renderer();
-
 }); //end load function
 
 
