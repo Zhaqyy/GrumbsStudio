@@ -3,7 +3,7 @@ import * as THREE from 'three'
 // import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 // import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
-import * as Stats from 'stats.js'
+// import * as Stats from 'stats.js'
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
@@ -17,8 +17,8 @@ import mFragment from "./shaders/mirror/fragment.glsl";
 
 
 
-const stats = new Stats();
-document.body.appendChild(stats.dom);
+// const stats = new Stats();
+// document.body.appendChild(stats.dom);
 
 const basecolor =
     // 0x463d40
@@ -451,7 +451,7 @@ const clock = new THREE.Clock()
 const tick = () => {
     const elapsedTime = clock.getElapsedTime()
     angle = elapsedTime
-    
+
     //update shader
     groundMirror.material.uniforms.time.value = elapsedTime
     noiseMat.uniforms.u_time.value = elapsedTime
