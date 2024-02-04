@@ -47,9 +47,6 @@ const sizes = {
  * Loaders
  */
 
-// Texture loader
-
-// const textureLoader = new THREE.TextureLoader()
 
 const dudvMap = new THREE.TextureLoader().load('/waterdudv.jpg')
 
@@ -61,7 +58,6 @@ dudvMap.wrapS = dudvMap.wrapT = THREE.RepeatWrapping;
 
 // GLTF loader
 const gltfLoader = new GLTFLoader()
-// gltfLoader.setDRACOLoader(dracoLoader)
 
 /**
  * Object
@@ -172,64 +168,6 @@ gltfLoader.load(
         // gltf.scene.rotation.set(0, 0, 0)
 
 
-
-        // grumbs.castShadow = true
-        // grumbs.scale.set(10, 10, 10)
-        // grumbs.position.x = 0
-        // grumbs.position.y = -2
-        // grumbs.position.z = 1
-
-        // function init() {
-        //     const parallaxX = pointer.x  * 0.5
-        //    const parallaxY = -pointer.y * 0.5
-
-        //    grumbs.rotation.x += (parallaxX - grumbs.rotation.x) * 0.5 
-        //    grumbs.rotation.y += (parallaxY - grumbs.rotation.y) * 0.5 
-        // }
-        // init()
-
-        // copy the geometry from the loaded model
-        // const sLgeometry = strobeLeft.geometry.clone();
-        // const sRgeometry = strobeRight.geometry.clone();
-        // const Xgeometry = X.geometry.clone();
-        // const Ggeometry = grumbs.geometry.clone();
-
-        // // Create a new mesh and place it in the scene
-
-        // const sLmesh = new THREE.Mesh(sLgeometry, TextMat);
-        // // sLmesh.rotation.x = Math.PI / 2;
-        // // sLmesh.position.set(0, 1.5, 0);
-        // // sLmesh.scale.set(2, 2, 2);
-        // sLmesh.castShadow = true
-
-
-        // const sRmesh = new THREE.Mesh(sRgeometry, TextMat);
-        // // sRmesh.rotation.x = Math.PI / 2;
-        // // sRmesh.position.set(0, 1.5, 0);
-        // // sRmesh.scale.set(2, 2, 2);
-        // sRmesh.castShadow = true
-
-
-        // const Xmesh = new THREE.Mesh(Xgeometry, TextMat);
-        // Xmesh.rotation.x = Math.PI / 2;
-        // // Xmesh.position.set(0, 1.5, 0);
-        // // Xmesh.scale.set(2, 2, 2);
-        // Xmesh.castShadow = true
-
-
-        // const Gmesh = new THREE.Mesh(Ggeometry, noiseMat);
-        // // Gmesh.scale.set(2, 2, 2);
-        // Gmesh.position.set(0, -1, 1);
-        // // Gmesh.castShadow = true
-
-        // scene.add(Xmesh, sLmesh, sRmesh, Gmesh);
-
-
-        // // Discard the loaded model
-        // gltf.scene.children.forEach((child) => {
-        //   child.geometry.dispose();
-        //   child.material.dispose();
-        // });
     }
 )
 
@@ -314,7 +252,7 @@ function updateCursor() {
     const distanceToCursor = point.position.distanceTo(targetPosition);
 
     if (distanceToCursor < REVOLVE_DISTANCE) {
-       
+
 
         let offsetX = Math.cos(angle) * REVOLVE_DISTANCE;
         let offsetY = Math.sin(angle) * REVOLVE_DISTANCE;
@@ -417,24 +355,6 @@ cameraGroup.add(camera);
 //Reflective Ground//////
 const planegeo = new THREE.PlaneGeometry(15, 20)
 
-const PlaneMat = new THREE.MeshStandardMaterial({
-    color: 0x000000,
-    emissive: 0x000000,
-    roughness: 0,
-    metalness: 1,
-    transparent: true,
-    opacity: 0.9,
-
-})
-
-const planeMesh = new THREE.Mesh(planegeo, PlaneMat)
-planeMesh.receiveShadow = true
-planeMesh.rotation.x = -Math.PI / 2;
-planeMesh.position.x = 0
-planeMesh.position.y = - 0.0001;
-planeMesh.position.z = 0
-// scene.add( planeMesh );
-
 
 const mirrorShader = Reflector.ReflectorShader
 mirrorShader.fragmentShader = mFragment
@@ -530,18 +450,19 @@ const clock = new THREE.Clock()
 
 const tick = () => {
     const elapsedTime = clock.getElapsedTime()
-angle = elapsedTime
+    angle = elapsedTime
+    
     //update shader
     groundMirror.material.uniforms.time.value = elapsedTime
     noiseMat.uniforms.u_time.value = elapsedTime
 
     if (sizes.width < sizes.height && cameraGroup) {
-    
+
         if (text) {
-            text.scale.set(0.7,0.7,0.7);
+            text.scale.set(0.7, 0.7, 0.7);
         }
         angle = elapsedTime * 5
-        
+
         // gltf.scene.scale.set(1, 1, 1)
         cameraGroup.rotation.y = THREE.MathUtils.lerp(cameraGroup.rotation.y, (pointer.x * Math.PI) / 30, 0.015)
         cameraGroup.rotation.x = THREE.MathUtils.lerp(cameraGroup.rotation.x, ((-pointer.y - 0.5) * Math.PI) / 100, 0.009)
