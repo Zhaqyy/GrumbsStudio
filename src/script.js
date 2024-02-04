@@ -480,13 +480,14 @@ const tick = () => {
 
 
     // Render
-    stats.begin()
+    // stats.begin()
     // renderer.render(scene, camera)
 
     composer.render();
     // init()
-    stats.end()
-    stats.update()
+    // stats.end()
+    // stats.update()
+    
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
 }
